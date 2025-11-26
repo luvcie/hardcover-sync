@@ -1,0 +1,293 @@
+/* popup styles for goodreads pdf tracker */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 350px;
+  min-height: 400px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-size: 14px;
+  color: #333;
+  background-color: #f4f1ea;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* header */
+header {
+  background-color: #382115;
+  color: #f4f1ea;
+  padding: 16px;
+  text-align: center;
+}
+
+header h1 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* main content */
+main {
+  flex: 1;
+  padding: 16px;
+}
+
+.section {
+  display: block;
+}
+
+.section.hidden {
+  display: none;
+}
+
+h2 {
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: #382115;
+}
+
+/* current book section */
+.book-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #382115;
+  margin-bottom: 4px;
+}
+
+.book-author {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+/* progress section */
+.progress-section {
+  margin: 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-section label {
+  font-size: 13px;
+  color: #666;
+}
+
+#current-page {
+  width: 80px;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+#current-page:focus {
+  outline: none;
+  border-color: #382115;
+}
+
+#total-pages-display {
+  font-size: 14px;
+  color: #666;
+}
+
+/* buttons */
+button {
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primary-btn {
+  background-color: #382115;
+  color: #f4f1ea;
+  margin-bottom: 8px;
+}
+
+.primary-btn:hover {
+  background-color: #4a2b1c;
+}
+
+.primary-btn:active {
+  transform: scale(0.98);
+}
+
+.secondary-btn {
+  background-color: transparent;
+  color: #382115;
+  border: 1px solid #382115;
+}
+
+.secondary-btn:hover {
+  background-color: rgba(56, 33, 21, 0.05);
+}
+
+/* search section */
+.help-text {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+#book-search {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+#book-search:focus {
+  outline: none;
+  border-color: #382115;
+}
+
+/* search results */
+.search-results {
+  margin-top: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.search-results.hidden {
+  display: none;
+}
+
+.result-item {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.result-item:hover {
+  background-color: rgba(56, 33, 21, 0.05);
+  border-color: #382115;
+}
+
+.result-title {
+  font-weight: 600;
+  color: #382115;
+  margin-bottom: 4px;
+}
+
+.result-author {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.result-pages {
+  font-size: 11px;
+  color: #999;
+}
+
+.no-results {
+  text-align: center;
+  color: #666;
+  padding: 20px;
+}
+
+/* status message */
+.status-message {
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.status-message.hidden {
+  display: none;
+}
+
+.status-message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.status-message.info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+/* footer */
+footer {
+  padding: 12px 16px;
+  border-top: 1px solid #ddd;
+}
+
+.floating-btn {
+  width: 100%;
+  padding: 10px 16px;
+  background-color: #f4f1ea;
+  color: #382115;
+  border: 1px solid #382115;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.floating-btn:hover {
+  background-color: rgba(56, 33, 21, 0.05);
+}
+
+.footer-links {
+  text-align: center;
+  padding-top: 8px;
+}
+
+.footer-links a {
+  font-size: 12px;
+  color: #382115;
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+/* scrollbar styling */
+.search-results::-webkit-scrollbar {
+  width: 8px;
+}
+
+.search-results::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.search-results::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.search-results::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

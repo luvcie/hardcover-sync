@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hardcover tracker settings</title>
+  <link rel="stylesheet" href="styles/settings.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>hardcover tracker settings</h1>
+    </header>
+
+    <main>
+      <section class="settings-section">
+        <h2>api configuration</h2>
+
+        <div class="info-box warning">
+          <strong>important:</strong> your api token is personal and should never be shared.
+          it provides full access to your hardcover account.
+        </div>
+
+        <div class="form-group">
+          <label for="api-token">hardcover api token:</label>
+          <textarea
+            id="api-token"
+            rows="6"
+            placeholder="paste your hardcover api token here..."
+          ></textarea>
+          <small class="help-text">
+            get your token from
+            <a href="https://hardcover.app/api" target="_blank" rel="noopener">hardcover.app/api</a>
+          </small>
+        </div>
+
+        <button id="save-token-btn" class="primary-btn">save token</button>
+        <button id="test-token-btn" class="secondary-btn">test connection</button>
+
+        <div id="status-message" class="status-message hidden"></div>
+      </section>
+
+      <section class="settings-section">
+        <h2>how to get your api token</h2>
+        <ol class="instructions">
+          <li>go to <a href="https://hardcover.app/api" target="_blank" rel="noopener">hardcover.app/api</a></li>
+          <li>log in to your hardcover account</li>
+          <li>copy the bearer token from the page</li>
+          <li>paste it in the field above</li>
+          <li>click "save token"</li>
+        </ol>
+
+        <div class="info-box info">
+          <strong>note:</strong> tokens expire after 1 year. you'll need to regenerate it when it expires.
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h2>about this extension</h2>
+        <p>
+          this extension uses hardcover's api to track your reading progress for pdfs.
+          since hardcover's api is designed for backend use, please be aware:
+        </p>
+        <ul>
+          <li>your api token is stored locally in your browser</li>
+          <li>never share your token or browser profile</li>
+          <li>this is for personal use only</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+/* settings page styles */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-size: 14px;
+  color: #333;
+  background-color: #f4f1ea;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* header */
+header {
+  background-color: #382115;
+  color: #f4f1ea;
+  padding: 24px;
+  margin-bottom: 32px;
+  border-radius: 8px;
+}
+
+header h1 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* main content */
+main {
+  background-color: white;
+  padding: 32px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.settings-section {
+  margin-bottom: 40px;
+}
+
+.settings-section:last-child {
+  margin-bottom: 0;
+}
+
+h2 {
+  font-size: 18px;
+  color: #382115;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #382115;
+  padding-bottom: 8px;
+}
+
+/* form elements */
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #382115;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  resize: vertical;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #382115;
+}
+
+.help-text {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-top: 6px;
+}
+
+.help-text a {
+  color: #382115;
+  text-decoration: underline;
+}
+
+/* buttons */
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 8px;
+}
+
+.primary-btn {
+  background-color: #382115;
+  color: #f4f1ea;
+}
+
+.primary-btn:hover {
+  background-color: #4a2b1c;
+}
+
+.secondary-btn {
+  background-color: transparent;
+  color: #382115;
+  border: 1px solid #382115;
+}
+
+.secondary-btn:hover {
+  background-color: rgba(56, 33, 21, 0.05);
+}
+
+/* info boxes */
+.info-box {
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-size: 13px;
+}
+
+.info-box.warning {
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+}
+
+.info-box.info {
+  background-color: #d1ecf1;
+  border: 1px solid #bee5eb;
+  color: #0c5460;
+}
+
+/* instructions list */
+.instructions {
+  padding-left: 24px;
+  margin-bottom: 16px;
+}
+
+.instructions li {
+  margin-bottom: 8px;
+}
+
+.instructions a {
+  color: #382115;
+  text-decoration: underline;
+}
+
+/* about section */
+.settings-section p {
+  margin-bottom: 12px;
+}
+
+.settings-section ul {
+  padding-left: 24px;
+}
+
+.settings-section ul li {
+  margin-bottom: 6px;
+}
+
+/* status message */
+.status-message {
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+.status-message.hidden {
+  display: none;
+}
+
+.status-message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.status-message.info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}

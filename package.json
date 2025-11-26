@@ -1,0 +1,31 @@
+{
+  "name": "goodreads-pdf-tracker",
+  "version": "0.1.0",
+  "description": "Track your reading progress on PDFs in Firefox and sync with Goodreads",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "dev": "npm run build:watch",
+    "build": "npm run clean && npm run build:extension",
+    "build:extension": "tsc && npm run copy:assets",
+    "build:watch": "tsc --watch",
+    "copy:assets": "node scripts/copy-assets.js",
+    "clean": "rm -rf dist",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write 'src/**/*.{ts,json,css,html}'",
+    "test": "web-ext run --source-dir=dist"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "canvas": "^3.2.0",
+    "eslint": "^8.57.0",
+    "fs-extra": "^11.2.0",
+    "pngjs": "^7.0.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.0",
+    "web-ext": "^8.0.0"
+  }
+}
