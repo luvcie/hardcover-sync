@@ -1,4 +1,4 @@
-/* sidebar styles for goodreads pdf tracker */
+/* sidebar styles for hardcover sync */
 
 * {
   margin: 0;
@@ -12,7 +12,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   font-size: 14px;
   color: #333;
-  background-color: #f4f1ea;
+  background-color: #f5f5f5;
 }
 
 .container {
@@ -23,8 +23,8 @@ body {
 
 /* header */
 header {
-  background-color: #382115;
-  color: #f4f1ea;
+  background-color: #6366f1;
+  color: #ffffff;
   padding: 16px;
   position: relative;
 }
@@ -41,7 +41,7 @@ header h1 {
   right: 8px;
   background: none;
   border: none;
-  color: #f4f1ea;
+  color: #ffffff;
   font-size: 28px;
   line-height: 1;
   cursor: pointer;
@@ -61,7 +61,7 @@ header h1 {
   gap: 8px;
   margin-top: 8px;
   padding: 8px;
-  background-color: rgba(244, 241, 234, 0.1);
+  background-color: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
 }
 
@@ -100,14 +100,14 @@ main {
 h2 {
   font-size: 16px;
   margin-bottom: 12px;
-  color: #382115;
+  color: #6366f1;
 }
 
 /* current book section */
 .book-title {
   font-size: 16px;
   font-weight: 600;
-  color: #382115;
+  color: #6366f1;
   margin-bottom: 4px;
 }
 
@@ -140,7 +140,7 @@ h2 {
 
 #current-page:focus {
   outline: none;
-  border-color: #382115;
+  border-color: #6366f1;
 }
 
 #total-pages-display {
@@ -162,13 +162,13 @@ button {
 }
 
 .primary-btn {
-  background-color: #382115;
-  color: #f4f1ea;
+  background-color: #6366f1;
+  color: #ffffff;
   margin-bottom: 8px;
 }
 
 .primary-btn:hover {
-  background-color: #4a2b1c;
+  background-color: #4f46e5;
 }
 
 .primary-btn:active {
@@ -177,12 +177,12 @@ button {
 
 .secondary-btn {
   background-color: transparent;
-  color: #382115;
-  border: 1px solid #382115;
+  color: #6366f1;
+  border: 1px solid #6366f1;
 }
 
 .secondary-btn:hover {
-  background-color: rgba(56, 33, 21, 0.05);
+  background-color: rgba(99, 102, 241, 0.05);
 }
 
 /* search section */
@@ -203,7 +203,7 @@ button {
 
 #book-search:focus {
   outline: none;
-  border-color: #382115;
+  border-color: #6366f1;
 }
 
 /* search results */
@@ -229,8 +229,8 @@ button {
 }
 
 .result-item:hover {
-  background-color: rgba(56, 33, 21, 0.05);
-  border-color: #382115;
+  background-color: rgba(99, 102, 241, 0.05);
+  border-color: #6366f1;
 }
 
 .result-cover {
@@ -262,7 +262,7 @@ button {
 
 .result-title {
   font-weight: 600;
-  color: #382115;
+  color: #6366f1;
   margin-bottom: 4px;
 }
 

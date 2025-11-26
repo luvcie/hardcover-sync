@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "Goodreads PDF Progress Tracker",
+  "name": "Hardcover Sync",
   "version": "0.1.0",
-  "description": "Track your reading progress on PDFs and sync with Goodreads",
+  "description": "Track your reading progress on PDFs and sync with Hardcover",
   "browser_specific_settings": {
     "gecko": {
-      "id": "goodreads-pdf-tracker@example.com"
+      "id": "hardcover-sync@example.com"
     }
   },
   "permissions": [
