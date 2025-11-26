@@ -168,6 +168,8 @@ button {
 }
 
 .result-item {
+  display: flex;
+  gap: 12px;
   padding: 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -179,6 +181,33 @@ button {
 .result-item:hover {
   background-color: rgba(56, 33, 21, 0.05);
   border-color: #382115;
+}
+
+.result-cover {
+  width: 50px;
+  height: 75px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.result-cover-placeholder {
+  width: 50px;
+  height: 75px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.result-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .result-title {

@@ -7,6 +7,8 @@
     author: string;
     totalPages: number;
     coverUrl?: string;
+    imageUrl?: string;
+    cachedImage?: string;
   }
 
   interface Progress {
@@ -188,7 +190,7 @@ function handleUpdateProgress() {
   });
 }
 
-function handleSearch() {
+async function handleSearch() {
   const query = bookSearchInput.value.trim();
 
   if (!query) {
@@ -198,46 +200,118 @@ function handleSearch() {
 
   showStatus('searching...', 'info');
 
-  // todo: implement actual goodreads api search
-  // for now, show mock results
-  setTimeout(() => {
-    displayMockResults(query);
-  }, 500);
+  try {
+    const result = await chrome.storage.sync.get(['hardcoverToken']);
+    const token = result.hardcoverToken;
+
+    if (!token) {
+      showStatus('please configure your api token in settings', 'error');
+      return;
+    }
+
+    const response = await fetch('https://api.hardcover.app/v1/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        query: `
+          query SearchBooks($query: String!) {
+            search(
+              query: $query,
+              query_type: "Book",
+              per_page: 10
+            ) {
+              results
+            }
+          }
+        `,
+        variables: {
+          query: query
+        }
+      })
+    });
+
+    const data = await response.json();
+    console.log('[hardcover popup] search response:', JSON.stringify(data, null, 2));
+
+    if (data.errors) {
+      console.error('[hardcover popup] api error:', data.errors);
+      showStatus('search failed - check your api token', 'error');
+      return;
+    }
+
+    if (data.data && data.data.search && data.data.search.results) {
+      const hits = data.data.search.results.hits || [];
+      if (hits.length === 0) {
+        showStatus('no results found', 'error');
+        searchResults.innerHTML = '<p class="no-results">no books found</p>';
+        searchResults.classList.remove('hidden');
+      } else {
+        displaySearchResults(hits);
+      }
+    } else {
+      showStatus('no results found', 'error');
+    }
+  } catch (error) {
+    console.error('[hardcover popup] search failed:', error);
+    showStatus('failed to search - network error', 'error');
+  }
 }
 
-function displayMockResults(query: string) {
-  const mockResults: Book[] = [
-    {
-      id: '1',
-      title: 'the lord of the rings',
-      author: 'j.r.r. tolkien',
-      totalPages: 1178,
-    },
-    {
-      id: '2',
-      title: 'the hobbit',
-      author: 'j.r.r. tolkien',
-      totalPages: 366,
-    },
-  ];
-
+function displaySearchResults(hits: any[]) {
   searchResults.innerHTML = '';
   searchResults.classList.remove('hidden');
   statusMessage.classList.add('hidden');
 
-  if (mockResults.length === 0) {
+  if (hits.length === 0) {
     searchResults.innerHTML = '<p class="no-results">no books found</p>';
     return;
   }
 
-  mockResults.forEach((book) => {
+  hits.forEach((hit) => {
+    const doc = hit.document;
+
+    console.log('[hardcover popup] processing hit:', JSON.stringify(doc, null, 2));
+
+    const authorName = doc.author_names && doc.author_names.length > 0
+      ? doc.author_names[0]
+      : 'unknown author';
+
+    // extract book cover image
+    let coverUrl = null;
+    if (doc.cached_image) {
+      coverUrl = doc.cached_image;
+    } else if (doc.image && doc.image.url) {
+      coverUrl = doc.image.url;
+    } else if (doc.image_url) {
+      coverUrl = doc.image_url;
+    }
+
+    const book: Book = {
+      id: doc.id.toString(),
+      title: doc.title || 'untitled',
+      author: authorName,
+      totalPages: doc.pages || doc.pages_count || 0,
+      imageUrl: coverUrl,
+      cachedImage: coverUrl,
+    };
+
     const resultItem = document.createElement('div');
     resultItem.className = 'result-item';
+
+    const displayCoverUrl = book.cachedImage || book.imageUrl;
+    const coverHtml = displayCoverUrl
+      ? `<img src="${displayCoverUrl}" alt="${book.title}" class="result-cover" />`
+      : '<div class="result-cover-placeholder">📖</div>';
+
     resultItem.innerHTML = `
+      ${coverHtml}
       <div class="result-info">
         <div class="result-title">${book.title}</div>
         <div class="result-author">${book.author}</div>
-        <div class="result-pages">${book.totalPages} pages</div>
+        <div class="result-pages">${book.totalPages > 0 ? book.totalPages + ' pages' : 'pages unknown'}</div>
       </div>
     `;
 
