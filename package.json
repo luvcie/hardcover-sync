@@ -1,9 +1,10 @@
 {
-  "name": "goodreads-pdf-tracker",
+  "name": "hardcover-sync",
   "version": "0.1.0",
-  "description": "Track your reading progress on PDFs in Firefox and sync with Goodreads",
-  "author": "",
+  "description": "Track your PDF reading in-browser progress and sync with Hardcover",
+  "author": "luvcie",
   "license": "MIT",
+  "homepage": "https://github.com/luvcie/hardcover-sync",
   "scripts": {
     "dev": "npm run build:watch",
     "build": "npm run clean && npm run build:extension",
@@ -11,6 +12,7 @@
     "build:watch": "tsc --watch",
     "copy:assets": "node scripts/copy-assets.js",
     "clean": "rm -rf dist",
+    "package": "npm run build && cd dist && zip -r ../hardcover-sync-$npm_package_version.zip .",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "format": "prettier --write 'src/**/*.{ts,json,css,html}'",

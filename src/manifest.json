@@ -2,10 +2,13 @@
   "manifest_version": 3,
   "name": "Hardcover Sync",
   "version": "0.1.0",
-  "description": "Track your reading progress on PDFs and sync with Hardcover",
+  "description": "Track your PDF reading in-browser progress and sync with Hardcover",
+  "author": "luvcie",
+  "homepage_url": "https://github.com/luvcie/hardcover-sync",
+
   "browser_specific_settings": {
     "gecko": {
-      "id": "hardcover-sync@example.com"
+      "id": "hardcover-sync@luvcie.love"
     }
   },
   "permissions": [
