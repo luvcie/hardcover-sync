@@ -86,6 +86,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   loadCurrentBook();
+
+  // check for pdf metadata and suggest auto-search
+  chrome.storage.local.get(['pdfMetadata'], (result) => {
+    if (result.pdfMetadata && (result.pdfMetadata.title || result.pdfMetadata.author)) {
+      console.log('[goodreads popup] found pdf metadata:', result.pdfMetadata);
+
+      // auto-fill search with metadata
+      chrome.storage.sync.get(['currentBook'], (bookResult) => {
+        if (!bookResult.currentBook) {
+          // only auto-search if no book is selected yet
+          const searchTerm = result.pdfMetadata.title || result.pdfMetadata.author || '';
+          if (searchTerm) {
+            bookSearchInput.value = searchTerm;
+            showStatus('detected from pdf: ' + searchTerm, 'info');
+          }
+        }
+      });
+    }
+  });
 });
 
 async function loadCurrentBook() {
@@ -105,7 +124,7 @@ async function loadCurrentBook() {
 
       // fetch latest progress from hardcover
       const currentProgress = await fetchCurrentProgress(result.currentBook.id);
-      console.log('[goodreads popup] fetched progress on load:', currentProgress);
+      console.log('[goodreads popup] fetched progress from hardcover:', currentProgress);
 
       showCurrentBook(result.currentBook, currentProgress);
     } else {

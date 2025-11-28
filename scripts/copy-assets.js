@@ -38,4 +38,11 @@ if (fs.existsSync(path.join(srcDir, 'styles'))) {
   );
 }
 
+// copy wordsninja dictionary
+const wordsninjaDict = path.join(__dirname, '../node_modules/wordsninja/words-en.json');
+if (fs.existsSync(wordsninjaDict)) {
+  fs.copySync(wordsninjaDict, path.join(distDir, 'words-en.json'));
+  console.log('wordsninja dictionary copied');
+}
+
 console.log('assets copied successfully');
