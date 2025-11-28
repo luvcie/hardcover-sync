@@ -186,6 +186,42 @@ chrome.windows.onRemoved.addListener((windowId) => {
   }
 });
 
+async function toggleFloatingWindow() {
+  if (floatingWindowId !== null) {
+    try {
+      await chrome.windows.remove(floatingWindowId);
+      floatingWindowId = null;
+      console.log('[goodreads bg] floating window closed via toggle');
+    } catch (error) {
+      console.error('[goodreads bg] failed to close floating window:', error);
+      floatingWindowId = null;
+    }
+  } else {
+    await openFloatingWindow();
+  }
+}
+
+// handle keyboard shortcuts
+chrome.commands.onCommand.addListener((command) => {
+  console.log('[goodreads bg] command received:', command);
+
+  // check if keybinds are enabled
+  chrome.storage.sync.get(['keybindsEnabled'], (result) => {
+    // default to true if not set
+    const enabled = result.keybindsEnabled !== false;
+
+    if (!enabled) {
+      console.log('[goodreads bg] keybinds disabled, ignoring command');
+      return;
+    }
+
+    if (command === 'toggle-floating' || command === 'toggle-floating-alt') {
+      // Ctrl+Shift+Comma or Ctrl+Shift+F - toggle floating window
+      toggleFloatingWindow();
+    }
+  });
+});
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'openFloatingWindow') {
     openFloatingWindow();

@@ -5,6 +5,7 @@
   let saveTokenBtn: HTMLElement;
   let testTokenBtn: HTMLElement;
   let statusMessage: HTMLElement;
+  let enableKeybindsCheckbox: HTMLInputElement;
 
   document.addEventListener('DOMContentLoaded', () => {
     console.log('[hardcover settings] initializing settings page');
@@ -13,11 +14,14 @@
     saveTokenBtn = document.getElementById('save-token-btn')!;
     testTokenBtn = document.getElementById('test-token-btn')!;
     statusMessage = document.getElementById('status-message')!;
+    enableKeybindsCheckbox = document.getElementById('enable-keybinds') as HTMLInputElement;
 
     saveTokenBtn.addEventListener('click', handleSaveToken);
     testTokenBtn.addEventListener('click', handleTestToken);
+    enableKeybindsCheckbox.addEventListener('change', handleKeybindsToggle);
 
     loadToken();
+    loadKeybindsPreference();
   });
 
   function loadToken() {
@@ -115,6 +119,41 @@
       console.error('[hardcover settings] test failed:', error);
       showStatus('failed to connect to hardcover api', 'error');
     }
+  }
+
+  function loadKeybindsPreference() {
+    console.log('[hardcover settings] loading keybinds preference');
+
+    chrome.storage.sync.get(['keybindsEnabled'], (result) => {
+      if (chrome.runtime.lastError) {
+        console.error('[hardcover settings] storage error:', chrome.runtime.lastError);
+        return;
+      }
+
+      // default to true if not set
+      const enabled = result.keybindsEnabled !== false;
+      enableKeybindsCheckbox.checked = enabled;
+      console.log('[hardcover settings] keybinds enabled:', enabled);
+    });
+  }
+
+  function handleKeybindsToggle() {
+    const enabled = enableKeybindsCheckbox.checked;
+    console.log('[hardcover settings] keybinds toggled to:', enabled);
+
+    chrome.storage.sync.set({ keybindsEnabled: enabled }, () => {
+      if (chrome.runtime.lastError) {
+        console.error('[hardcover settings] failed to save preference:', chrome.runtime.lastError);
+        showStatus('failed to save preference', 'error');
+        return;
+      }
+
+      console.log('[hardcover settings] keybinds preference saved');
+      showStatus(
+        enabled ? 'keyboard shortcuts enabled' : 'keyboard shortcuts disabled',
+        'success'
+      );
+    });
   }
 
   function showStatus(message: string, type: 'success' | 'error' | 'info') {

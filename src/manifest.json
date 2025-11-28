@@ -59,5 +59,28 @@
   "options_ui": {
     "page": "settings.html",
     "browser_style": false
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Period",
+        "mac": "Command+Shift+Period"
+      },
+      "description": "Open extension popup"
+    },
+    "toggle-floating": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Comma",
+        "mac": "Command+Shift+Comma"
+      },
+      "description": "Toggle floating window"
+    },
+    "toggle-floating-alt": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+F",
+        "mac": "Command+Shift+F"
+      },
+      "description": "Toggle floating window (alternative)"
+    }
   }
 }

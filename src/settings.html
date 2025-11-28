@@ -56,6 +56,35 @@
       </section>
 
       <section class="settings-section">
+        <h2>keyboard shortcuts</h2>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="enable-keybinds" checked>
+            <span>enable keyboard shortcuts</span>
+          </label>
+          <small class="help-text">
+            disable this if keyboard shortcuts conflict with other extensions
+          </small>
+        </div>
+
+        <div id="keybinds-list" class="keybinds-info">
+          <h3>available shortcuts:</h3>
+          <ul>
+            <li><kbd>Ctrl+Shift+.</kbd> - open extension popup</li>
+            <li><kbd>Ctrl+Shift+,</kbd> - toggle floating window</li>
+            <li><kbd>Ctrl+Shift+F</kbd> - toggle floating window (alternative)</li>
+            <li><kbd>Arrow Up</kbd> - increment page number</li>
+            <li><kbd>Arrow Down</kbd> - decrement page number</li>
+            <li><kbd>Enter</kbd> - submit/update progress</li>
+          </ul>
+          <small class="help-text">
+            note: arrow keys and enter only work when the page input is focused
+          </small>
+        </div>
+      </section>
+
+      <section class="settings-section">
         <h2>about this extension</h2>
         <p>
           this extension uses hardcover's api to track your reading progress for pdfs.

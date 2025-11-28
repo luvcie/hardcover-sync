@@ -73,6 +73,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  // keyboard shortcuts for current page input
+  currentPageInput.addEventListener('keydown', (e) => {
+    // check if keybinds are enabled
+    chrome.storage.sync.get(['keybindsEnabled'], (result) => {
+      const enabled = result.keybindsEnabled !== false;
+
+      if (!enabled) {
+        return; // keybinds disabled, use default behavior
+      }
+
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const currentValue = parseInt(currentPageInput.value) || 0;
+        currentPageInput.value = (currentValue + 1).toString();
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const currentValue = parseInt(currentPageInput.value) || 0;
+        if (currentValue > 0) {
+          currentPageInput.value = (currentValue - 1).toString();
+        }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        handleUpdateProgress();
+      }
+    });
+  });
+
+  // auto-focus page input when popup opens
+  setTimeout(() => {
+    currentPageInput.focus();
+  }, 100);
+
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (tab && tab.url) {
     const isPDF = tab.url.toLowerCase().endsWith('.pdf') ||
