@@ -100,10 +100,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadCurrentBook();
 });
 
-function loadCurrentBook() {
+async function loadCurrentBook() {
   console.log('[goodreads sidebar] loading current book from storage');
 
-  chrome.storage.sync.get(['currentBook', 'currentProgress'], (result) => {
+  chrome.storage.sync.get(['currentBook'], async (result) => {
     if (chrome.runtime.lastError) {
       console.error('[goodreads sidebar] storage error:', chrome.runtime.lastError);
       showBookSelection();
@@ -114,7 +114,12 @@ function loadCurrentBook() {
 
     if (result.currentBook) {
       console.log('[goodreads sidebar] found current book:', result.currentBook);
-      showCurrentBook(result.currentBook, result.currentProgress);
+
+      // fetch latest progress from hardcover
+      const currentProgress = await fetchCurrentProgress(result.currentBook.id);
+      console.log('[goodreads sidebar] fetched progress on load:', currentProgress);
+
+      showCurrentBook(result.currentBook, currentProgress);
     } else {
       console.log('[goodreads sidebar] no current book found');
       showBookSelection();
@@ -122,7 +127,7 @@ function loadCurrentBook() {
   });
 }
 
-function showCurrentBook(book: Book, progress?: Progress) {
+function showCurrentBook(book: Book, currentPage?: number | null) {
   currentBookSection.classList.remove('hidden');
   selectBookSection.classList.add('hidden');
 
@@ -130,8 +135,8 @@ function showCurrentBook(book: Book, progress?: Progress) {
   bookAuthorEl.textContent = book.author;
   totalPagesDisplay.textContent = `/ ${book.totalPages}`;
 
-  if (progress) {
-    currentPageInput.value = progress.currentPage.toString();
+  if (currentPage !== null && currentPage !== undefined) {
+    currentPageInput.value = currentPage.toString();
   }
 
   currentPageInput.max = book.totalPages.toString();
@@ -258,7 +263,11 @@ async function handleSearch() {
       const hits = data.data.search.results.hits || [];
       if (hits.length === 0) {
         showStatus('no results found', 'error');
-        searchResults.innerHTML = '<p class="no-results">no books found</p>';
+        searchResults.textContent = '';
+        const noResults = document.createElement('p');
+        noResults.className = 'no-results';
+        noResults.textContent = 'no books found';
+        searchResults.appendChild(noResults);
         searchResults.classList.remove('hidden');
       } else {
         displaySearchResults(hits);
@@ -273,12 +282,15 @@ async function handleSearch() {
 }
 
 function displaySearchResults(hits: any[]) {
-  searchResults.innerHTML = '';
+  searchResults.textContent = '';
   searchResults.classList.remove('hidden');
   statusMessage.classList.add('hidden');
 
   if (hits.length === 0) {
-    searchResults.innerHTML = '<p class="no-results">no books found</p>';
+    const noResults = document.createElement('p');
+    noResults.className = 'no-results';
+    noResults.textContent = 'no books found';
+    searchResults.appendChild(noResults);
     return;
   }
 
@@ -314,26 +326,54 @@ function displaySearchResults(hits: any[]) {
     resultItem.className = 'result-item';
 
     const displayCoverUrl = book.cachedImage || book.imageUrl;
-    const coverHtml = displayCoverUrl
-      ? `<img src="${displayCoverUrl}" alt="${book.title}" class="result-cover" />`
-      : '<div class="result-cover-placeholder">📖</div>';
+    if (displayCoverUrl) {
+      const img = document.createElement('img');
+      img.src = displayCoverUrl;
+      img.alt = book.title;
+      img.className = 'result-cover';
+      resultItem.appendChild(img);
+    } else {
+      const placeholder = document.createElement('div');
+      placeholder.className = 'result-cover-placeholder';
+      placeholder.textContent = '📖';
+      resultItem.appendChild(placeholder);
+    }
 
-    resultItem.innerHTML = `
-      ${coverHtml}
-      <div class="result-info">
-        <div class="result-title">${book.title}</div>
-        <div class="result-author">${book.author}</div>
-        <div class="result-pages">${book.totalPages > 0 ? book.totalPages + ' pages' : 'pages unknown'}</div>
-      </div>
-    `;
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'result-info';
+
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'result-title';
+    titleDiv.textContent = book.title;
+
+    const authorDiv = document.createElement('div');
+    authorDiv.className = 'result-author';
+    authorDiv.textContent = book.author;
+
+    const pagesDiv = document.createElement('div');
+    pagesDiv.className = 'result-pages';
+    pagesDiv.textContent = book.totalPages > 0 ? book.totalPages + ' pages' : 'pages unknown';
+
+    infoDiv.appendChild(titleDiv);
+    infoDiv.appendChild(authorDiv);
+    infoDiv.appendChild(pagesDiv);
+    resultItem.appendChild(infoDiv);
 
     resultItem.addEventListener('click', () => selectBook(book));
     searchResults.appendChild(resultItem);
   });
 }
 
-function selectBook(book: Book) {
+async function selectBook(book: Book) {
   console.log('[goodreads sidebar] selecting book:', book);
+
+  // fetch current progress from hardcover
+  const currentProgress = await fetchCurrentProgress(book.id);
+
+  if (currentProgress !== null) {
+    console.log('[goodreads sidebar] fetched current progress from hardcover:', currentProgress);
+    showStatus(`synced from hardcover: page ${currentProgress}`, 'info');
+  }
 
   chrome.storage.sync.set({ currentBook: book }, () => {
     if (chrome.runtime.lastError) {
@@ -343,9 +383,70 @@ function selectBook(book: Book) {
     }
 
     console.log('[goodreads sidebar] book saved successfully');
-    showCurrentBook(book);
-    showStatus('book selected', 'success');
+    showCurrentBook(book, currentProgress);
+    if (currentProgress === null) {
+      showStatus('book selected', 'success');
+    }
   });
+}
+
+async function fetchCurrentProgress(bookId: string): Promise<number | null> {
+  try {
+    const result = await chrome.storage.sync.get(['hardcoverToken']);
+    const token = result.hardcoverToken;
+
+    if (!token) {
+      console.log('[goodreads sidebar] no api token, skipping progress fetch');
+      return null;
+    }
+
+    // query for user_book and its progress
+    const query = `
+      query GetBookProgress($bookId: Int!) {
+        user_books(
+          where: {
+            book_id: {_eq: $bookId},
+            status_id: {_eq: 2}
+          },
+          limit: 1
+        ) {
+          id
+          user_book_reads(order_by: {id: desc}, limit: 1) {
+            progress_pages
+          }
+        }
+      }
+    `;
+
+    const response = await fetch('https://api.hardcover.app/v1/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        query: query,
+        variables: { bookId: parseInt(bookId) }
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.errors) {
+      console.error('[goodreads sidebar] failed to fetch progress:', data.errors);
+      return null;
+    }
+
+    const userBooks = data.data?.user_books || [];
+    if (userBooks.length > 0 && userBooks[0].user_book_reads?.length > 0) {
+      return userBooks[0].user_book_reads[0].progress_pages || null;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('[goodreads sidebar] failed to fetch progress:', error);
+    return null;
+  }
 }
 
 function showStatus(message: string, type: 'success' | 'error' | 'info') {
