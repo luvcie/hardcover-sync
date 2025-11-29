@@ -6,13 +6,87 @@
   box-sizing: border-box;
 }
 
+:root[data-theme="light"] {
+  --color-bg: #f5f5f5;
+  --color-bg-elevated: #ffffff;
+  --color-text-primary: #333;
+  --color-text-secondary: #666;
+  --color-text-tertiary: #999;
+  --color-primary: #6366f1;
+  --color-primary-hover: #4f46e5;
+  --color-primary-subtle: rgba(99, 102, 241, 0.05);
+  --color-border: #ccc;
+  --color-border-subtle: #ddd;
+  --color-header-bg: #6366f1;
+  --color-header-text: #ffffff;
+
+  /* result item colors */
+  --color-result-bg-hover: rgba(99, 102, 241, 0.05);
+  --color-result-placeholder-bg: #e0e0e0;
+  --color-scrollbar-track: #f1f1f1;
+  --color-scrollbar-thumb: #888;
+  --color-scrollbar-thumb-hover: #555;
+
+  /* pdf indicator */
+  --color-pdf-badge-bg: #d32f2f;
+  --color-pdf-indicator-bg: rgba(255, 255, 255, 0.1);
+
+  /* status colors */
+  --color-info-bg: #d1ecf1;
+  --color-info-border: #bee5eb;
+  --color-info-text: #0c5460;
+  --color-success-bg: #d4edda;
+  --color-success-border: #c3e6cb;
+  --color-success-text: #155724;
+  --color-error-bg: #f8d7da;
+  --color-error-border: #f5c6cb;
+  --color-error-text: #721c24;
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #3d34b8;
+  --color-bg-elevated: #4d43c4;
+  --color-text-primary: #e8e6f0;
+  --color-text-secondary: #d0c8f8;
+  --color-text-tertiary: #b0a8e0;
+  --color-primary: #8078d0;
+  --color-primary-hover: #6a62bb;
+  --color-primary-subtle: rgba(128, 120, 208, 0.15);
+  --color-border: #5a52d4;
+  --color-border-subtle: #453cc0;
+  --color-header-bg: linear-gradient(90deg, #3d34b8 0%, #4d43c4 100%);
+  --color-header-text: #ffffff;
+
+  /* result item colors */
+  --color-result-bg-hover: rgba(160, 152, 240, 0.1);
+  --color-result-placeholder-bg: #5a52d4;
+  --color-scrollbar-track: #453cc0;
+  --color-scrollbar-thumb: #5a52d4;
+  --color-scrollbar-thumb-hover: #7068e0;
+
+  /* pdf indicator */
+  --color-pdf-badge-bg: #d32f2f;
+  --color-pdf-indicator-bg: rgba(255, 255, 255, 0.1);
+
+  /* status colors */
+  --color-info-bg: #1a3540;
+  --color-info-border: #2a4a5a;
+  --color-info-text: #8dd4f0;
+  --color-success-bg: #4a4080;
+  --color-success-border: #6058a0;
+  --color-success-text: #e0d8ff;
+  --color-error-bg: #3a1e24;
+  --color-error-border: #5a2e34;
+  --color-error-text: #f4a0ac;
+}
+
 body {
   width: 100%;
   min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   font-size: 14px;
-  color: #333;
-  background-color: #f5f5f5;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg);
 }
 
 .container {
@@ -23,8 +97,8 @@ body {
 
 /* header */
 header {
-  background-color: #6366f1;
-  color: #ffffff;
+  background: var(--color-header-bg);
+  color: var(--color-header-text);
   padding: 16px;
   position: relative;
 }
@@ -41,7 +115,7 @@ header h1 {
   right: 8px;
   background: none;
   border: none;
-  color: #ffffff;
+  color: var(--color-header-text);
   font-size: 28px;
   line-height: 1;
   cursor: pointer;
@@ -61,7 +135,7 @@ header h1 {
   gap: 8px;
   margin-top: 8px;
   padding: 8px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--color-pdf-indicator-bg);
   border-radius: 4px;
 }
 
@@ -70,7 +144,7 @@ header h1 {
 }
 
 .pdf-badge {
-  background-color: #d32f2f;
+  background-color: var(--color-pdf-badge-bg);
   color: white;
   padding: 4px 8px;
   border-radius: 3px;
@@ -100,20 +174,28 @@ main {
 h2 {
   font-size: 16px;
   margin-bottom: 12px;
-  color: #6366f1;
+  color: var(--color-primary);
+}
+
+:root[data-theme="dark"] h2 {
+  color: #bfbbe5;
 }
 
 /* current book section */
 .book-title {
   font-size: 16px;
   font-weight: 600;
-  color: #6366f1;
+  color: var(--color-primary);
   margin-bottom: 4px;
+}
+
+:root[data-theme="dark"] .book-title {
+  color: #e8e6f0;
 }
 
 .book-author {
   font-size: 13px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin-bottom: 16px;
 }
 
@@ -127,25 +209,27 @@ h2 {
 
 .progress-section label {
   font-size: 13px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 #current-page {
   width: 100%;
   padding: 8px 12px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   font-size: 16px;
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
 }
 
 #current-page:focus {
   outline: none;
-  border-color: #6366f1;
+  border-color: var(--color-primary);
 }
 
 #total-pages-display {
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin-top: -4px;
 }
 
@@ -162,13 +246,13 @@ button {
 }
 
 .primary-btn {
-  background-color: #6366f1;
-  color: #ffffff;
+  background-color: var(--color-primary);
+  color: var(--color-header-text);
   margin-bottom: 8px;
 }
 
 .primary-btn:hover {
-  background-color: #4f46e5;
+  background-color: var(--color-primary-hover);
 }
 
 .primary-btn:active {
@@ -177,33 +261,44 @@ button {
 
 .secondary-btn {
   background-color: transparent;
-  color: #6366f1;
-  border: 1px solid #6366f1;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+}
+
+:root[data-theme="dark"] .secondary-btn {
+  color: #e8e6f0;
+  border-color: #e8e6f0;
 }
 
 .secondary-btn:hover {
-  background-color: rgba(99, 102, 241, 0.05);
+  background-color: var(--color-primary-subtle);
 }
 
 /* search section */
 .help-text {
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin-bottom: 12px;
 }
 
 #book-search {
   width: 100%;
   padding: 8px 12px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   font-size: 14px;
   margin-bottom: 8px;
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="dark"] #book-search::placeholder {
+  color: #b5b1e2;
 }
 
 #book-search:focus {
   outline: none;
-  border-color: #6366f1;
+  border-color: var(--color-primary);
 }
 
 /* search results */
@@ -221,16 +316,17 @@ button {
   display: flex;
   gap: 12px;
   padding: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border-subtle);
   border-radius: 4px;
   margin-bottom: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
+  background-color: var(--color-bg-elevated);
 }
 
 .result-item:hover {
-  background-color: rgba(99, 102, 241, 0.05);
-  border-color: #6366f1;
+  background-color: var(--color-result-bg-hover);
+  border-color: var(--color-primary);
 }
 
 .result-cover {
@@ -247,7 +343,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #e0e0e0;
+  background-color: var(--color-result-placeholder-bg);
   border-radius: 4px;
   font-size: 24px;
   flex-shrink: 0;
@@ -262,24 +358,28 @@ button {
 
 .result-title {
   font-weight: 600;
-  color: #6366f1;
+  color: var(--color-primary);
   margin-bottom: 4px;
+}
+
+:root[data-theme="dark"] .result-title {
+  color: #e8e6f0;
 }
 
 .result-author {
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin-bottom: 4px;
 }
 
 .result-pages {
   font-size: 11px;
-  color: #999;
+  color: var(--color-text-tertiary);
 }
 
 .no-results {
   text-align: center;
-  color: #666;
+  color: var(--color-text-secondary);
   padding: 20px;
 }
 
@@ -296,28 +396,28 @@ button {
 }
 
 .status-message.success {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
 }
 
 .status-message.error {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
+  background-color: var(--color-error-bg);
+  color: var(--color-error-text);
+  border: 1px solid var(--color-error-border);
 }
 
 .status-message.info {
-  background-color: #d1ecf1;
-  color: #0c5460;
-  border: 1px solid #bee5eb;
+  background-color: var(--color-info-bg);
+  color: var(--color-info-text);
+  border: 1px solid var(--color-info-border);
 }
 
 /* footer */
 footer {
   padding: 12px 16px;
-  border-top: 1px solid #ddd;
-  background-color: #fff;
+  border-top: 1px solid var(--color-border-subtle);
+  background-color: var(--color-bg);
 }
 
 footer .help-text {
@@ -333,17 +433,17 @@ main::-webkit-scrollbar {
 
 .search-results::-webkit-scrollbar-track,
 main::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--color-scrollbar-track);
   border-radius: 4px;
 }
 
 .search-results::-webkit-scrollbar-thumb,
 main::-webkit-scrollbar-thumb {
-  background: #888;
+  background: var(--color-scrollbar-thumb);
   border-radius: 4px;
 }
 
 .search-results::-webkit-scrollbar-thumb:hover,
 main::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: var(--color-scrollbar-thumb-hover);
 }

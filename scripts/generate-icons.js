@@ -1,5 +1,5 @@
 // simple icon generator using canvas
-// creates basic book-shaped icons for the extension
+// creates basic icons for the extension
 
 const fs = require('fs');
 const path = require('path');
@@ -19,7 +19,7 @@ try {
 const iconsDir = path.join(__dirname, '../src/icons');
 const sizes = [16, 32, 48, 128];
 
-// goodreads colors
+// colors
 const bgColor = '#382115';
 const fgColor = '#f4f1ea';
 
@@ -81,11 +81,7 @@ if (useCanvas) {
     console.log(`created ${svgFilename}`);
   });
 
-  console.log('\nsvg icons created. to convert to png, you can:');
-  console.log('1. install canvas: npm install canvas');
-  console.log('2. or use an online converter');
-  console.log('3. or install imagemagick/inkscape and convert manually');
-  console.log('\nfor now, you can try loading the extension - some browsers accept svg icons.');
+  console.log('\nsvg icons created. to convert to png, you can npm install canvas:');
 }
 
 console.log('\nicon generation complete!');

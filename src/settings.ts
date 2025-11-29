@@ -6,6 +6,7 @@
   let testTokenBtn: HTMLElement;
   let statusMessage: HTMLElement;
   let enableKeybindsCheckbox: HTMLInputElement;
+  let themeRadios: NodeListOf<HTMLInputElement>;
 
   document.addEventListener('DOMContentLoaded', () => {
     console.log('[hardcover settings] initializing settings page');
@@ -15,13 +16,20 @@
     testTokenBtn = document.getElementById('test-token-btn')!;
     statusMessage = document.getElementById('status-message')!;
     enableKeybindsCheckbox = document.getElementById('enable-keybinds') as HTMLInputElement;
+    themeRadios = document.querySelectorAll('input[name="theme"]');
 
     saveTokenBtn.addEventListener('click', handleSaveToken);
     testTokenBtn.addEventListener('click', handleTestToken);
     enableKeybindsCheckbox.addEventListener('change', handleKeybindsToggle);
 
+    themeRadios.forEach(radio => {
+      radio.addEventListener('change', handleThemeChange);
+    });
+
     loadToken();
     loadKeybindsPreference();
+    loadThemePreference();
+    applyTheme();
   });
 
   function loadToken() {
@@ -155,6 +163,75 @@
       );
     });
   }
+
+  function loadThemePreference() {
+    console.log('[hardcover settings] loading theme preference');
+
+    chrome.storage.local.get(['theme'], (result) => {
+      if (chrome.runtime.lastError) {
+        console.error('[hardcover settings] storage error:', chrome.runtime.lastError);
+        return;
+      }
+
+      // default to auto if not set
+      const theme = result.theme || 'auto';
+      const radioToCheck = document.getElementById(`theme-${theme}`) as HTMLInputElement;
+      if (radioToCheck) {
+        radioToCheck.checked = true;
+      }
+      console.log('[hardcover settings] theme preference loaded:', theme);
+    });
+  }
+
+  function handleThemeChange() {
+    const selectedTheme = Array.from(themeRadios).find(radio => radio.checked)?.value || 'auto';
+    console.log('[hardcover settings] theme changed to:', selectedTheme);
+
+    chrome.storage.local.set({ theme: selectedTheme }, () => {
+      if (chrome.runtime.lastError) {
+        console.error('[hardcover settings] failed to save theme:', chrome.runtime.lastError);
+        showStatus('failed to save theme preference', 'error');
+        return;
+      }
+
+      console.log('[hardcover settings] theme preference saved');
+      applyTheme();
+      showStatus('theme updated', 'success');
+    });
+  }
+
+  function applyTheme() {
+    chrome.storage.local.get(['theme'], (result) => {
+      const theme = result.theme || 'auto';
+      console.log('[hardcover settings] applying theme:', theme);
+
+      if (theme === 'auto') {
+        // check system preference
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+    });
+  }
+
+  // listen for storage changes to update theme in real-time
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === 'local' && changes.theme) {
+      console.log('[hardcover settings] theme changed in storage, reapplying');
+      applyTheme();
+    }
+  });
+
+  // listen for system theme changes when in auto mode
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    chrome.storage.local.get(['theme'], (result) => {
+      if (result.theme === 'auto' || !result.theme) {
+        console.log('[hardcover settings] system theme changed, reapplying');
+        applyTheme();
+      }
+    });
+  });
 
   function showStatus(message: string, type: 'success' | 'error' | 'info') {
     statusMessage.textContent = message;

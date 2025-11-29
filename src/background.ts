@@ -106,6 +106,7 @@ chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
     console.log('[goodreads bg] extension installed');
     initializeSettings();
+    initializeTheme();
   }
 });
 
@@ -278,6 +279,17 @@ function initializeSettings() {
       });
     } else {
       console.log('[goodreads bg] settings already exist');
+    }
+  });
+}
+
+function initializeTheme() {
+  // set default theme to 'auto' on install
+  chrome.storage.local.get('theme', (data) => {
+    if (data.theme === undefined) {
+      chrome.storage.local.set({ theme: 'auto' }, () => {
+        console.log('[hardcover bg] default theme set to auto');
+      });
     }
   });
 }

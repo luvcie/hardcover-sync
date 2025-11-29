@@ -118,6 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   loadCurrentBook();
+  applyTheme();
 
   // check for pdf metadata and suggest auto-search
   chrome.storage.local.get(['pdfMetadata'], (result) => {
@@ -497,5 +498,38 @@ function showStatus(message: string, type: 'success' | 'error' | 'info') {
     statusMessage.classList.add('hidden');
   }, 3000);
 }
+
+function applyTheme() {
+  chrome.storage.local.get(['theme'], (result) => {
+    const theme = result.theme || 'auto';
+    console.log('[hardcover popup] applying theme:', theme);
+
+    if (theme === 'auto') {
+      // check system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  });
+}
+
+// listen for storage changes to update theme in real-time
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === 'local' && changes.theme) {
+    console.log('[hardcover popup] theme changed in storage, reapplying');
+    applyTheme();
+  }
+});
+
+// listen for system theme changes when in auto mode
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+  chrome.storage.local.get(['theme'], (result) => {
+    if (result.theme === 'auto' || !result.theme) {
+      console.log('[hardcover popup] system theme changed, reapplying');
+      applyTheme();
+    }
+  });
+});
 
 })(); // end of iife
