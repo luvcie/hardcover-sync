@@ -1,94 +1,4 @@
-/* settings page styles */
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-:root[data-theme="light"] {
-  --color-bg: #f5f5f5;
-  --color-bg-elevated: #ffffff;
-  --color-text-primary: #333;
-  --color-text-secondary: #666;
-  --color-text-tertiary: #999;
-  --color-primary: #6366f1;
-  --color-primary-hover: #4f46e5;
-  --color-primary-subtle: rgba(99, 102, 241, 0.05);
-  --color-border: #ccc;
-  --color-border-subtle: #ddd;
-  --color-header-bg: #6366f1;
-  --color-header-text: #ffffff;
-
-  /* status colors */
-  --color-warning-bg: #fff3cd;
-  --color-warning-border: #ffc107;
-  --color-warning-text: #856404;
-  --color-info-bg: #d1ecf1;
-  --color-info-border: #bee5eb;
-  --color-info-text: #0c5460;
-  --color-success-bg: #d4edda;
-  --color-success-border: #c3e6cb;
-  --color-success-text: #155724;
-  --color-error-bg: #f8d7da;
-  --color-error-border: #f5c6cb;
-  --color-error-text: #721c24;
-
-  /* keybinds section */
-  --color-keybinds-bg: #f8f9fa;
-  --color-keybinds-border: #e9ecef;
-  --color-keybinds-heading: #495057;
-  --color-keybinds-text: #6c757d;
-  --color-kbd-bg: #f1f3f5;
-  --color-kbd-border: #ced4da;
-  --color-kbd-text: #333;
-}
-
-:root[data-theme="dark"] {
-  --color-bg: #3d34b8;
-  --color-bg-elevated: #4d43c4;
-  --color-text-primary: #e8e6f0;
-  --color-text-secondary: #d0c8f8;
-  --color-text-tertiary: #b0a8e0;
-  --color-primary: #8078d0;
-  --color-primary-hover: #6a62bb;
-  --color-primary-subtle: rgba(128, 120, 208, 0.15);
-  --color-border: #5a52d4;
-  --color-border-subtle: #453cc0;
-  --color-header-bg: linear-gradient(90deg, #3d34b8 0%, #4d43c4 100%);
-  --color-header-text: #ffffff;
-
-  /* status colors */
-  --color-warning-bg: #4a1a3a;
-  --color-warning-border: #7a2a5a;
-  --color-warning-text: #f4d8f0;
-  --color-info-bg: #4a1a3a;
-  --color-info-border: #7a2a5a;
-  --color-info-text: #f4d8f0;
-  --color-success-bg: #4a4080;
-  --color-success-border: #6058a0;
-  --color-success-text: #e0d8ff;
-  --color-error-bg: #3a1e24;
-  --color-error-border: #5a2e34;
-  --color-error-text: #f4a0ac;
-
-  /* keybinds section */
-  --color-keybinds-bg: #453cc0;
-  --color-keybinds-border: #5a52d4;
-  --color-keybinds-heading: #e8e6f0;
-  --color-keybinds-text: #d0c8f8;
-  --color-kbd-bg: #5a52d4;
-  --color-kbd-border: #7068e0;
-  --color-kbd-text: #ffffff;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  font-size: 14px;
-  color: var(--color-text-primary);
-  background-color: var(--color-bg);
-  line-height: 1.6;
-}
+/* settings page specific styles */
 
 .container {
   max-width: 800px;
@@ -134,6 +44,10 @@ h2 {
   padding-bottom: 8px;
 }
 
+:root[data-theme="dark"] h2 {
+  color: var(--color-text-emphasis);
+}
+
 /* form elements */
 .form-group {
   margin-bottom: 20px;
@@ -146,21 +60,13 @@ label {
   color: var(--color-text-primary);
 }
 
-textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
-  resize: vertical;
-  background-color: var(--color-bg-elevated);
-  color: var(--color-text-primary);
+:root[data-theme="dark"] label {
+  color: var(--color-text-emphasis);
 }
 
-textarea:focus {
-  outline: none;
-  border-color: var(--color-primary);
+textarea {
+  width: 100%;
+  resize: vertical;
 }
 
 .help-text {
@@ -175,65 +81,19 @@ textarea:focus {
   text-decoration: underline;
 }
 
-/* buttons */
+:root[data-theme="dark"] .help-text a {
+  color: var(--color-text-emphasis);
+}
+
+/* button layout */
 button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
   margin-right: 8px;
 }
 
-.primary-btn {
-  background-color: var(--color-primary);
-  color: var(--color-header-text);
-}
-
-.primary-btn:hover {
-  background-color: var(--color-primary-hover);
-}
-
-.secondary-btn {
-  background-color: transparent;
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
-}
-
-.secondary-btn:hover {
-  background-color: var(--color-primary-subtle);
-}
-
-:root[data-theme="dark"] textarea::placeholder {
-  color: #e8e6f0;
-  opacity: 0.7;
-}
-
-:root[data-theme="dark"] .secondary-btn {
-  color: #e8e6f0;
-  border-color: #e8e6f0;
-}
-
-/* info boxes */
+/* info boxes specific layout */
 .info-box {
-  padding: 12px 16px;
-  border-radius: 4px;
   margin-bottom: 20px;
-  font-size: 13px;
-}
-
-.info-box.warning {
-  background-color: var(--color-warning-bg);
-  border: 1px solid var(--color-warning-border);
-  color: var(--color-warning-text);
-}
-
-.info-box.info {
-  background-color: var(--color-info-bg);
-  border: 1px solid var(--color-info-border);
-  color: var(--color-info-text);
+  border-radius: 4px;
 }
 
 /* instructions list */
@@ -244,11 +104,6 @@ button {
 
 .instructions li {
   margin-bottom: 8px;
-}
-
-.instructions a {
-  color: var(--color-primary);
-  text-decoration: underline;
 }
 
 /* about section */
@@ -264,37 +119,7 @@ button {
   margin-bottom: 6px;
 }
 
-/* status message */
-.status-message {
-  padding: 12px 16px;
-  border-radius: 4px;
-  margin-top: 16px;
-  font-size: 13px;
-}
-
-.status-message.hidden {
-  display: none;
-}
-
-.status-message.success {
-  background-color: var(--color-success-bg);
-  color: var(--color-success-text);
-  border: 1px solid var(--color-success-border);
-}
-
-.status-message.error {
-  background-color: var(--color-error-bg);
-  color: var(--color-error-text);
-  border: 1px solid var(--color-error-border);
-}
-
-.status-message.info {
-  background-color: var(--color-info-bg);
-  color: var(--color-info-text);
-  border: 1px solid var(--color-info-border);
-}
-
-/* theme selector */
+/* theme selector specific layout */
 .theme-selector {
   display: flex;
   gap: 16px;
