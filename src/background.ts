@@ -52,11 +52,11 @@ class WordSegmenter {
     const cost = [0];
 
     const bestMatch = (i: number): [number, number] => {
-      const candidates = cost.slice(Math.max(0, i - this.maxWordLen), i).reverse();
       let minPair: [number, number] = [Number.MAX_SAFE_INTEGER, 0];
 
-      candidates.forEach((c, k) => {
-        const substr = s.substring(i - k - 1, i).toLowerCase();
+      for (let k = 1; k <= Math.min(i, this.maxWordLen); k++) {
+        const c = cost[i - k];
+        const substr = s.substring(i - k, i).toLowerCase();
         let cCost: number;
 
         if (this.wordCost[substr]) {
@@ -66,9 +66,9 @@ class WordSegmenter {
         }
 
         if (cCost < minPair[0]) {
-          minPair = [cCost, k + 1];
+          minPair = [cCost, k];
         }
-      });
+      }
 
       return minPair;
     };

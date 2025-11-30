@@ -32,6 +32,7 @@
   let searchBtn: HTMLElement;
   let searchResults: HTMLElement;
   let statusMessage: HTMLElement;
+  let keybindsEnabled = true;
 
 document.addEventListener('DOMContentLoaded', async () => {
   currentBookSection = document.getElementById('current-book-section')!;
@@ -46,6 +47,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   searchBtn = document.getElementById('search-btn')!;
   searchResults = document.getElementById('search-results')!;
   statusMessage = document.getElementById('status-message')!;
+
+  // load keybinds preference
+  chrome.storage.sync.get(['keybindsEnabled'], (result) => {
+    keybindsEnabled = result.keybindsEnabled !== false;
+  });
+
+  // listen for changes to keybinds preference
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === 'sync' && changes.keybindsEnabled) {
+      keybindsEnabled = changes.keybindsEnabled.newValue !== false;
+      console.log('[goodreads sidebar] keybinds preference updated:', keybindsEnabled);
+    }
+  });
 
   const closeBtn = document.getElementById('close-btn');
   if (closeBtn) {
@@ -67,29 +81,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // keyboard shortcuts for current page input
   currentPageInput.addEventListener('keydown', (e) => {
-    // check if keybinds are enabled
-    chrome.storage.sync.get(['keybindsEnabled'], (result) => {
-      const enabled = result.keybindsEnabled !== false;
+    if (!keybindsEnabled) {
+      return; // keybinds disabled, use default behavior
+    }
 
-      if (!enabled) {
-        return; // keybinds disabled, use default behavior
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const currentValue = parseInt(currentPageInput.value) || 0;
+      currentPageInput.value = (currentValue + 1).toString();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      const currentValue = parseInt(currentPageInput.value) || 0;
+      if (currentValue > 0) {
+        currentPageInput.value = (currentValue - 1).toString();
       }
-
-      if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        const currentValue = parseInt(currentPageInput.value) || 0;
-        currentPageInput.value = (currentValue + 1).toString();
-      } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        const currentValue = parseInt(currentPageInput.value) || 0;
-        if (currentValue > 0) {
-          currentPageInput.value = (currentValue - 1).toString();
-        }
-      } else if (e.key === 'Enter') {
-        e.preventDefault();
-        handleUpdateProgress();
-      }
-    });
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      handleUpdateProgress();
+    }
   });
 
   // auto-focus page input when floating window opens
