@@ -97,7 +97,6 @@ class WordSegmenter {
 
 const wordSegmenter = new WordSegmenter();
 
-// initialize word segmentation dictionary
 (async () => {
   await wordSegmenter.loadDictionary();
 })();
@@ -129,7 +128,6 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         console.error('[goodreads bg] failed to set badge:', error);
       }
 
-      // wait a bit for pdf to load, then extract metadata
       if (tab.url) {
         setTimeout(async () => {
           try {
@@ -202,13 +200,10 @@ async function toggleFloatingWindow() {
   }
 }
 
-// handle keyboard shortcuts
 chrome.commands.onCommand.addListener((command) => {
   console.log('[goodreads bg] command received:', command);
 
-  // check if keybinds are enabled
   chrome.storage.sync.get(['keybindsEnabled'], (result) => {
-    // default to true if not set
     const enabled = result.keybindsEnabled !== false;
 
     if (!enabled) {
@@ -217,7 +212,6 @@ chrome.commands.onCommand.addListener((command) => {
     }
 
     if (command === 'toggle-floating' || command === 'toggle-floating-alt') {
-      // Ctrl+Shift+Comma or Ctrl+Shift+F - toggle floating window
       toggleFloatingWindow();
     }
   });
@@ -258,6 +252,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse({ success: true });
     return true;
   }
+
+  if (request.action === 'addBook') {
+    addBookToLibrary(request.bookId)
+      .then((result) => sendResponse(result))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+
+  if (request.action === 'removeBook') {
+    removeBookFromLibrary(request.bookId)
+      .then((success) => sendResponse({ success }))
+      .catch(() => sendResponse({ success: false }));
+    return true;
+  }
 });
 
 function initializeSettings() {
@@ -284,7 +292,6 @@ function initializeSettings() {
 }
 
 function initializeTheme() {
-  // set default theme to 'auto' on install
   chrome.storage.local.get('theme', (data) => {
     if (data.theme === undefined) {
       chrome.storage.local.set({ theme: 'auto' }, () => {
@@ -314,13 +321,11 @@ async function updateReadingProgress(bookId: string, currentPage: number, totalP
     console.log('[hardcover bg] progress saved successfully');
   });
 
-  // sync to hardcover api
   await syncToHardcover(bookId, currentPage);
 }
 
 async function syncToHardcover(bookId: string, currentPage: number) {
   try {
-    // get api token from storage
     const result = await chrome.storage.sync.get(['hardcoverToken']);
     const token = result.hardcoverToken;
 
@@ -329,7 +334,6 @@ async function syncToHardcover(bookId: string, currentPage: number) {
       return;
     }
 
-    // check if user has this book with status "currently reading"
     const checkQuery = `
       query CheckUserBook($bookId: Int!) {
         user_books(
@@ -360,59 +364,19 @@ async function syncToHardcover(bookId: string, currentPage: number) {
 
     const checkData = await checkResponse.json();
 
-    console.log('[hardcover bg] check response:', checkData);
-
     if (checkData.errors) {
       console.error('[hardcover bg] api error checking user book:', checkData.errors);
       return;
     }
 
-    let userBookId: number;
-
     if (!checkData.data.user_books || checkData.data.user_books.length === 0) {
-      // add book to library
-      console.log('[hardcover bg] book not in library, adding it');
-
-      const insertMutation = `
-        mutation AddBook($bookId: Int!) {
-          insert_user_book(object: {
-            book_id: $bookId,
-            status_id: 2
-          }) {
-            id
-          }
-        }
-      `;
-
-      const insertResponse = await fetch('https://api.hardcover.app/v1/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          query: insertMutation,
-          variables: { bookId: parseInt(bookId) }
-        })
-      });
-
-      const insertData = await insertResponse.json();
-
-      console.log('[hardcover bg] insert response:', insertData);
-
-      if (insertData.errors) {
-        console.error('[hardcover bg] failed to add book:', insertData.errors);
-        return;
-      }
-
-      userBookId = insertData.data.insert_user_book.id;
-      console.log('[hardcover bg] book added with user_book_id:', userBookId);
-    } else {
-      userBookId = checkData.data.user_books[0].id;
-      console.log('[hardcover bg] book found with user_book_id:', userBookId);
+      console.log('[hardcover bg] book not in library, skipping sync');
+      return;
     }
 
-    // get existing read record to update it
+    const userBookId = checkData.data.user_books[0].id;
+    let existingReadId: number | null = null;
+
     const getReadQuery = `
       query GetUserBookRead($userBookId: Int!) {
         user_book_reads(
@@ -444,10 +408,12 @@ async function syncToHardcover(bookId: string, currentPage: number) {
       return;
     }
 
-    // include existing record id to update it, otherwise create new
-    const existingRead = readData.data?.user_book_reads?.[0];
-    const datesRead = existingRead
-      ? [{ id: existingRead.id, progress_pages: currentPage }]
+    if (readData.data?.user_book_reads?.length > 0) {
+      existingReadId = readData.data.user_book_reads[0].id;
+    }
+
+    const datesRead = existingReadId
+      ? [{ id: existingReadId, progress_pages: currentPage }]
       : [{ progress_pages: currentPage }];
 
     console.log('[hardcover bg] datesRead:', datesRead);
@@ -491,10 +457,211 @@ async function syncToHardcover(bookId: string, currentPage: number) {
     }
 
     console.log('[hardcover bg] progress synced successfully to hardcover');
-    console.log('[hardcover bg] response:', progressData.data);
 
   } catch (error) {
     console.error('[hardcover bg] sync failed:', error);
+  }
+}
+
+async function addBookToLibrary(bookId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const result = await chrome.storage.sync.get(['hardcoverToken']);
+    const token = result.hardcoverToken;
+
+    if (!token) {
+      console.log('[hardcover bg] no api token, cannot add book');
+      return { success: false, error: 'no api token' };
+    }
+
+    console.log('[hardcover bg] adding book to library (try insert):', bookId);
+
+    const insertMutation = `
+      mutation AddBook($bookId: Int!) {
+        insert_user_book(object: {
+          book_id: $bookId,
+          status_id: 2
+        }) {
+          id
+        }
+      }
+    `;
+
+    const insertResponse = await fetch('https://api.hardcover.app/v1/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        query: insertMutation,
+        variables: { bookId: parseInt(bookId) }
+      })
+    });
+
+    const insertData = await insertResponse.json();
+
+    if (!insertData.errors) {
+      console.log('[hardcover bg] insert successful:', insertData.data);
+      return { success: true };
+    }
+
+    console.warn('[hardcover bg] insert failed, trying update:', insertData.errors);
+
+    // fallback: check if book exists and update
+    const checkQuery = `
+      query CheckUserBook($bookId: Int!) {
+        user_books(
+          where: {
+            book_id: {_eq: $bookId}
+          },
+          limit: 1
+        ) {
+          id
+          status_id
+        }
+      }
+    `;
+
+    const checkResponse = await fetch('https://api.hardcover.app/v1/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        query: checkQuery,
+        variables: { bookId: parseInt(bookId) }
+      })
+    });
+
+    const checkData = await checkResponse.json();
+
+    if (checkData.data?.user_books && checkData.data.user_books.length > 0) {
+      const userBookId = checkData.data.user_books[0].id;
+      console.log('[hardcover bg] found existing book, updating status:', userBookId);
+
+      const updateMutation = `
+        mutation UpdateUserBookStatus($id: Int!) {
+          update_user_book(
+            id: $id,
+            object: { status_id: 2 }
+          ) {
+            id
+          }
+        }
+      `;
+
+      const updateResponse = await fetch('https://api.hardcover.app/v1/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          query: updateMutation,
+          variables: { id: userBookId }
+        })
+      });
+
+      const updateData = await updateResponse.json();
+
+      if (!updateData.errors) {
+        console.log('[hardcover bg] update successful');
+        return { success: true };
+      }
+      
+      return { success: false, error: 'update failed: ' + updateData.errors[0]?.message };
+    }
+
+    return { success: false, error: 'insert failed: ' + insertData.errors[0]?.message };
+
+  } catch (error) {
+    console.error('[hardcover bg] error adding book:', error);
+    return { success: false, error: 'network error' };
+  }
+}
+
+async function removeBookFromLibrary(bookId: string): Promise<boolean> {
+  try {
+    const result = await chrome.storage.sync.get(['hardcoverToken']);
+    const token = result.hardcoverToken;
+
+    if (!token) {
+      console.log('[hardcover bg] no api token, cannot remove book');
+      return false;
+    }
+
+    console.log('[hardcover bg] removing book from library:', bookId);
+
+    const checkQuery = `
+      query GetUserBookId($bookId: Int!) {
+        user_books(
+          where: {
+            book_id: {_eq: $bookId}
+          }
+        ) {
+          id
+        }
+      }
+    `;
+
+    const checkResponse = await fetch('https://api.hardcover.app/v1/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        query: checkQuery,
+        variables: { bookId: parseInt(bookId) }
+      })
+    });
+
+    const checkData = await checkResponse.json();
+
+    if (checkData.errors || !checkData.data.user_books || checkData.data.user_books.length === 0) {
+      console.error('[hardcover bg] failed to find user book to delete');
+      return false;
+    }
+
+    const userBooks = checkData.data.user_books;
+    console.log('[hardcover bg] found user_books to delete:', userBooks);
+
+    const deleteMutation = `
+      mutation DeleteUserBook($id: Int!) {
+        delete_user_book(id: $id) {
+          id
+        }
+      }
+    `;
+
+    const deletePromises = userBooks.map((ub: any) => {
+      return fetch('https://api.hardcover.app/v1/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          query: deleteMutation,
+          variables: { id: ub.id }
+        })
+      }).then(res => res.json());
+    });
+
+    const results = await Promise.all(deletePromises);
+    console.log('[hardcover bg] delete results:', results);
+
+    const hasErrors = results.some(r => r.errors);
+    if (hasErrors) {
+      console.error('[hardcover bg] some deletions failed');
+      return true;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('[hardcover bg] error removing book:', error);
+    return false;
   }
 }
 
@@ -508,10 +675,7 @@ async function extractPDFFilename(tabId: number, url: string) {
       .replace(/\.pdf$/i, '')
       .replace(/%20/g, ' ');
 
-    // first, try to extract ISBN (best for exact matches)
-    // ISBN-13: 13 digits starting with 978 or 979
     const isbn13Match = cleanName.match(/\b(97[89]\d{10})\b/);
-    // ISBN-10: 9 digits + check digit (0-9 or X)
     const isbn10Match = cleanName.match(/\b(\d{9}[\dXx])\b/);
 
     if (isbn13Match) {
@@ -521,31 +685,24 @@ async function extractPDFFilename(tabId: number, url: string) {
       metadata = { title: isbn10Match[1] };
       console.log('[hardcover bg] extracted ISBN-10 from filename:', metadata);
     } else {
-      // no ISBN found, fall back to cleaning the title
-      // split on common delimiters that separate title from metadata
       if (cleanName.includes(' -- ')) {
         cleanName = cleanName.split(' -- ')[0];
       } else if (cleanName.includes('--')) {
         cleanName = cleanName.split('--')[0];
       }
 
-      // remove common metadata patterns
-      // hex hashes (common in archive downloads)
       cleanName = cleanName.replace(/\b[a-f0-9]{32,}\b/gi, '');
 
-      // common download sources
       cleanName = cleanName.replace(/Anna'?s Archive/gi, '');
       cleanName = cleanName.replace(/Library Genesis/gi, '');
       cleanName = cleanName.replace(/LibGen/gi, '');
       cleanName = cleanName.replace(/Z-Library/gi, '');
 
-      // normalize spacing and underscores
       cleanName = cleanName
         .replace(/[_-]/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
 
-      // if it's a single concatenated word with no spaces, try to split it
       if (wordSegmenter.isReady() && cleanName && !cleanName.includes(' ') && cleanName.length > 10) {
         try {
           const segmented = wordSegmenter.splitSentence(cleanName);

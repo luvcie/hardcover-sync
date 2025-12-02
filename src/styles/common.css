@@ -1,5 +1,3 @@
-/* common styles shared across the extension */
-
 * {
   margin: 0;
   padding: 0;
@@ -12,7 +10,7 @@
   --color-text-primary: #333;
   --color-text-secondary: #666;
   --color-text-tertiary: #999;
-  --color-text-emphasis: #333; /* standard text color for light mode */
+  --color-text-emphasis: #333;
   
   --color-primary: #6366f1;
   --color-primary-hover: #4f46e5;
@@ -24,20 +22,16 @@
   --color-header-bg: #6366f1;
   --color-header-text: #ffffff;
 
-  /* result item colors */
   --color-result-bg-hover: rgba(99, 102, 241, 0.05);
   --color-result-placeholder-bg: #e0e0e0;
   
-  /* scrollbars */
   --color-scrollbar-track: #f1f1f1;
   --color-scrollbar-thumb: #888;
   --color-scrollbar-thumb-hover: #555;
 
-  /* pdf indicator */
   --color-pdf-badge-bg: #d32f2f;
   --color-pdf-indicator-bg: rgba(255, 255, 255, 0.1);
 
-  /* status colors */
   --color-info-bg: #d1ecf1;
   --color-info-border: #bee5eb;
   --color-info-text: #0c5460;
@@ -51,7 +45,6 @@
   --color-error-border: #f5c6cb;
   --color-error-text: #721c24;
 
-  /* keybinds section */
   --color-keybinds-bg: #f8f9fa;
   --color-keybinds-border: #e9ecef;
   --color-keybinds-heading: #495057;
@@ -67,7 +60,7 @@
   --color-text-primary: #e8e6f0;
   --color-text-secondary: #d0c8f8;
   --color-text-tertiary: #b0a8e0;
-  --color-text-emphasis: #e8e6f0; /* highlights titles, inputs, etc. */
+  --color-text-emphasis: #e8e6f0;
 
   --color-primary: #8078d0;
   --color-primary-hover: #6a62bb;
@@ -79,20 +72,16 @@
   --color-header-bg: linear-gradient(90deg, #3d34b8 0%, #4d43c4 100%);
   --color-header-text: #ffffff;
 
-  /* result item colors */
   --color-result-bg-hover: rgba(160, 152, 240, 0.1);
   --color-result-placeholder-bg: #5a52d4;
   
-  /* scrollbars */
   --color-scrollbar-track: #453cc0;
   --color-scrollbar-thumb: #5a52d4;
   --color-scrollbar-thumb-hover: #7068e0;
 
-  /* pdf indicator */
   --color-pdf-badge-bg: #d32f2f;
   --color-pdf-indicator-bg: rgba(255, 255, 255, 0.1);
 
-  /* status colors */
   --color-info-bg: #4a1a3a;
   --color-info-border: #7a2a5a;
   --color-info-text: #f4d8f0;
@@ -106,7 +95,6 @@
   --color-error-border: #5a2e34;
   --color-error-text: #f4a0ac;
 
-  /* keybinds section */
   --color-keybinds-bg: #453cc0;
   --color-keybinds-border: #5a52d4;
   --color-keybinds-heading: #e8e6f0;
@@ -124,9 +112,6 @@ body {
   line-height: 1.6;
 }
 
-/* common components */
-
-/* buttons */
 button, .primary-btn, .secondary-btn, .floating-btn {
   padding: 10px 16px;
   border-radius: 4px;
@@ -165,7 +150,74 @@ button:active, .primary-btn:active, .secondary-btn:active, .floating-btn:active 
   border-color: var(--color-text-emphasis);
 }
 
-/* inputs */
+.icon-btn {
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  background-color: var(--color-primary);
+  color: var(--color-header-text);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: background-color 0.2s;
+}
+
+.icon-btn:hover {
+  background-color: var(--color-primary-hover);
+}
+
+#remove-book-btn:hover {
+  background-color: #d32f2f;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.section-header h2 {
+  margin-bottom: 0;
+}
+
+.danger-btn {
+  background-color: transparent;
+  color: var(--color-text-subtle);
+  border: 1px solid var(--color-border);
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  padding: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.danger-btn:hover {
+  background-color: #d32f2f;
+  color: white;
+  border-color: #d32f2f;
+}
+
+.danger-btn.confirming {
+  background-color: #d32f2f;
+  color: white;
+  border-color: #d32f2f;
+  width: auto;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
 input[type="text"], input[type="number"], textarea {
   padding: 8px 12px;
   border: 1px solid var(--color-border);
@@ -191,7 +243,6 @@ input:focus, textarea:focus {
   opacity: 0.8;
 }
 
-/* status messages */
 .status-message {
   padding: 10px 12px;
   border-radius: 4px;
@@ -221,7 +272,6 @@ input:focus, textarea:focus {
   border: 1px solid var(--color-info-border);
 }
 
-/* scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -240,7 +290,6 @@ input:focus, textarea:focus {
   background: var(--color-scrollbar-thumb-hover);
 }
 
-/* utilities */
 .hidden {
   display: none !important;
 }
@@ -257,3 +306,4 @@ a:hover {
 :root[data-theme="dark"] a {
   color: var(--color-text-emphasis);
 }
+

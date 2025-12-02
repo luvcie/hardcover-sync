@@ -19,14 +19,17 @@
     percentComplete: number;
   }
 
-  // dom elements
   let currentBookSection: HTMLElement;
   let selectBookSection: HTMLElement;
   let bookTitleEl: HTMLElement;
   let bookAuthorEl: HTMLElement;
   let currentPageInput: HTMLInputElement;
   let totalPagesDisplay: HTMLElement;
+  let pageLabel: HTMLElement;
+  let addText: HTMLElement;
   let updateBtn: HTMLElement;
+  let addBookBtn: HTMLElement;
+  let removeBookBtn: HTMLElement;
   let changeBookBtn: HTMLElement;
   let bookSearchInput: HTMLInputElement;
   let searchBtn: HTMLElement;
@@ -41,14 +44,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   bookAuthorEl = document.getElementById('book-author')!;
   currentPageInput = document.getElementById('current-page') as HTMLInputElement;
   totalPagesDisplay = document.getElementById('total-pages-display')!;
+  pageLabel = document.getElementById('page-label')!;
+  addText = document.getElementById('add-text')!;
   updateBtn = document.getElementById('update-btn')!;
+  addBookBtn = document.getElementById('add-book-btn')!;
+  removeBookBtn = document.getElementById('remove-book-btn')!;
   changeBookBtn = document.getElementById('change-book-btn')!;
   bookSearchInput = document.getElementById('book-search') as HTMLInputElement;
   searchBtn = document.getElementById('search-btn')!;
   searchResults = document.getElementById('search-results')!;
   statusMessage = document.getElementById('status-message')!;
 
-  // load keybinds preference
   chrome.storage.sync.get(['keybindsEnabled'], (result) => {
     keybindsEnabled = result.keybindsEnabled !== false;
   });
@@ -71,6 +77,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   updateBtn.addEventListener('click', handleUpdateProgress);
+  addBookBtn.addEventListener('click', handleAddBook);
+  removeBookBtn.addEventListener('click', handleRemoveBook);
   changeBookBtn.addEventListener('click', showBookSelection);
   searchBtn.addEventListener('click', handleSearch);
   bookSearchInput.addEventListener('keypress', (e) => {
@@ -79,10 +87,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // keyboard shortcuts for current page input
   currentPageInput.addEventListener('keydown', (e) => {
     if (!keybindsEnabled) {
-      return; // keybinds disabled, use default behavior
+      return; 
     }
 
     if (e.key === 'ArrowUp') {
@@ -97,11 +104,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      handleUpdateProgress();
+      if (!addBookBtn.classList.contains('hidden')) {
+        handleAddBook();
+      } else {
+        handleUpdateProgress();
+      }
     }
   });
 
-  // auto-focus page input when popup opens
   setTimeout(() => {
     currentPageInput.focus();
   }, 100);
@@ -121,15 +131,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadCurrentBook();
   applyTheme();
 
-  // check for pdf metadata and suggest auto-search
   chrome.storage.local.get(['pdfMetadata'], (result) => {
     if (result.pdfMetadata && (result.pdfMetadata.title || result.pdfMetadata.author)) {
       console.log('[goodreads popup] found pdf metadata:', result.pdfMetadata);
 
-      // auto-fill search with metadata
       chrome.storage.sync.get(['currentBook'], (bookResult) => {
         if (!bookResult.currentBook) {
-          // only auto-search if no book is selected yet
           const searchTerm = result.pdfMetadata.title || result.pdfMetadata.author || '';
           if (searchTerm) {
             bookSearchInput.value = searchTerm;
@@ -140,6 +147,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
+
+  interface BookStatus {
+    inLibrary: boolean;
+    progressPage: number | null;
+  }
 
 async function loadCurrentBook() {
   console.log('[goodreads popup] loading current book from storage');
@@ -156,11 +168,10 @@ async function loadCurrentBook() {
     if (result.currentBook) {
       console.log('[goodreads popup] found current book:', result.currentBook);
 
-      // fetch latest progress from hardcover
-      const currentProgress = await fetchCurrentProgress(result.currentBook.id);
-      console.log('[goodreads popup] fetched progress from hardcover:', currentProgress);
+      const status = await fetchCurrentProgress(result.currentBook.id);
+      console.log('[goodreads popup] fetched status from hardcover:', status);
 
-      showCurrentBook(result.currentBook, currentProgress);
+      showCurrentBook(result.currentBook, status);
     } else {
       console.log('[goodreads popup] no current book found');
       showBookSelection();
@@ -168,7 +179,7 @@ async function loadCurrentBook() {
   });
 }
 
-function showCurrentBook(book: Book, currentPage?: number | null) {
+function showCurrentBook(book: Book, status: BookStatus | null) {
   currentBookSection.classList.remove('hidden');
   selectBookSection.classList.add('hidden');
 
@@ -176,11 +187,123 @@ function showCurrentBook(book: Book, currentPage?: number | null) {
   bookAuthorEl.textContent = book.author;
   totalPagesDisplay.textContent = `/ ${book.totalPages}`;
 
-  if (currentPage !== null && currentPage !== undefined) {
-    currentPageInput.value = currentPage.toString();
+  if (status) {
+    if (status.progressPage !== null) {
+      currentPageInput.value = status.progressPage.toString();
+    }
+    
+    if (status.inLibrary) {
+      addBookBtn.classList.add('hidden');
+      removeBookBtn.classList.remove('hidden');
+      updateBtn.classList.remove('hidden');
+      currentPageInput.classList.remove('hidden');
+      totalPagesDisplay.classList.remove('hidden');
+      pageLabel.classList.remove('hidden');
+      addText.classList.add('hidden');
+    } else {
+      addBookBtn.classList.remove('hidden');
+      removeBookBtn.classList.add('hidden');
+      updateBtn.classList.add('hidden');
+      currentPageInput.classList.add('hidden');
+      totalPagesDisplay.classList.add('hidden');
+      pageLabel.classList.add('hidden');
+      addText.classList.remove('hidden');
+      showStatus('book not in library. click + to add.', 'info');
+    }
+  } else {
+    addBookBtn.classList.remove('hidden');
+    removeBookBtn.classList.add('hidden');
+    updateBtn.classList.add('hidden');
+    currentPageInput.classList.add('hidden');
+    totalPagesDisplay.classList.add('hidden');
+    pageLabel.classList.add('hidden');
+    addText.classList.remove('hidden');
+    showStatus('could not check library status', 'error');
   }
 
   currentPageInput.max = book.totalPages.toString();
+}
+
+function handleAddBook() {
+  chrome.storage.sync.get(['currentBook'], (result) => {
+    if (chrome.runtime.lastError || !result.currentBook) {
+      showStatus('error: no book selected', 'error');
+      return;
+    }
+
+    const book = result.currentBook as Book;
+    console.log('[goodreads popup] adding book to library:', book.id);
+    showStatus('adding to library...', 'info');
+
+    chrome.runtime.sendMessage(
+      {
+        action: 'addBook',
+        bookId: book.id
+      },
+      (response) => {
+        if (response && response.success) {
+          showStatus('book added to library', 'success');
+          // optimistically update ui to avoid read-after-write race conditions
+          showCurrentBook(book, { inLibrary: true, progressPage: null });
+          
+          // if user entered a page number (though input is hidden usually), update
+          if (currentPageInput.value && parseInt(currentPageInput.value) > 0) {
+             handleUpdateProgress();
+          }
+        } else {
+          const errorMsg = response?.error || 'unknown error';
+          console.error('[goodreads popup] failed to add book:', errorMsg);
+          showStatus('failed to add: ' + errorMsg, 'error');
+        }
+      }
+    );
+  });
+}
+
+function handleRemoveBook() {
+  if (!removeBookBtn.classList.contains('confirming')) {
+    removeBookBtn.classList.add('confirming');
+    removeBookBtn.textContent = 'sure?';
+    
+    setTimeout(() => {
+      if (removeBookBtn.classList.contains('confirming')) {
+        removeBookBtn.classList.remove('confirming');
+        removeBookBtn.textContent = '-';
+      }
+    }, 3000);
+    return;
+  }
+
+  chrome.storage.sync.get(['currentBook'], (result) => {
+    if (chrome.runtime.lastError || !result.currentBook) {
+      return;
+    }
+
+    const book = result.currentBook as Book;
+    
+    console.log('[goodreads popup] removing book from library:', book.id);
+    showStatus('removing from library...', 'info');
+    
+    removeBookBtn.classList.remove('confirming');
+    removeBookBtn.textContent = '-';
+
+    chrome.runtime.sendMessage(
+      {
+        action: 'removeBook',
+        bookId: book.id
+      },
+      (response) => {
+        if (response && response.success) {
+          showStatus('book removed from library', 'success');
+          chrome.storage.sync.remove(['currentBook'], () => {
+            showBookSelection();
+          });
+        } else {
+          showStatus('failed to remove book', 'error');
+        }
+      }
+    );
+  });
 }
 
 function showBookSelection() {
@@ -408,12 +531,11 @@ function displaySearchResults(hits: any[]) {
 async function selectBook(book: Book) {
   console.log('[goodreads popup] selecting book:', book);
 
-  // fetch current progress from hardcover
-  const currentProgress = await fetchCurrentProgress(book.id);
+  const status = await fetchCurrentProgress(book.id);
 
-  if (currentProgress !== null) {
-    console.log('[goodreads popup] fetched current progress from hardcover:', currentProgress);
-    showStatus(`synced from hardcover: page ${currentProgress}`, 'info');
+  if (status && status.progressPage !== null) {
+    console.log('[goodreads popup] fetched current progress from hardcover:', status.progressPage);
+    showStatus(`synced from hardcover: page ${status.progressPage}`, 'info');
   }
 
   chrome.storage.sync.set({ currentBook: book }, () => {
@@ -424,14 +546,16 @@ async function selectBook(book: Book) {
     }
 
     console.log('[goodreads popup] book saved successfully');
-    showCurrentBook(book, currentProgress);
-    if (currentProgress === null) {
+    showCurrentBook(book, status);
+    if (status && !status.inLibrary) {
+      showStatus('book selected. click + to add to library.', 'info');
+    } else if (status && status.progressPage === null) {
       showStatus('book selected', 'success');
     }
   });
 }
 
-async function fetchCurrentProgress(bookId: string): Promise<number | null> {
+async function fetchCurrentProgress(bookId: string): Promise<BookStatus | null> {
   try {
     const result = await chrome.storage.sync.get(['hardcoverToken']);
     const token = result.hardcoverToken;
@@ -441,7 +565,6 @@ async function fetchCurrentProgress(bookId: string): Promise<number | null> {
       return null;
     }
 
-    // query for user_book and its progress
     const query = `
       query GetBookProgress($bookId: Int!) {
         user_books(
@@ -479,11 +602,15 @@ async function fetchCurrentProgress(bookId: string): Promise<number | null> {
     }
 
     const userBooks = data.data?.user_books || [];
-    if (userBooks.length > 0 && userBooks[0].user_book_reads?.length > 0) {
-      return userBooks[0].user_book_reads[0].progress_pages || null;
+    const inLibrary = userBooks.length > 0;
+    
+    let progressPage: number | null = null;
+
+    if (inLibrary && userBooks[0].user_book_reads?.length > 0) {
+      progressPage = userBooks[0].user_book_reads[0].progress_pages || null;
     }
 
-    return null;
+    return { inLibrary, progressPage };
   } catch (error) {
     console.error('[goodreads popup] failed to fetch progress:', error);
     return null;
@@ -506,7 +633,6 @@ function applyTheme() {
     console.log('[hardcover popup] applying theme:', theme);
 
     if (theme === 'auto') {
-      // check system preference
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
     } else {
@@ -515,7 +641,6 @@ function applyTheme() {
   });
 }
 
-// listen for storage changes to update theme in real-time
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (areaName === 'local' && changes.theme) {
     console.log('[hardcover popup] theme changed in storage, reapplying');
@@ -523,7 +648,6 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }
 });
 
-// listen for system theme changes when in auto mode
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
   chrome.storage.local.get(['theme'], (result) => {
     if (result.theme === 'auto' || !result.theme) {

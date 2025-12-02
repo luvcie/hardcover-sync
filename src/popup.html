@@ -15,14 +15,19 @@
 
     <main>
       <div id="current-book-section" class="section hidden">
-        <h2>current book</h2>
+        <div class="section-header">
+          <h2>current book</h2>
+          <button id="remove-book-btn" class="icon-btn danger-btn hidden" title="remove from library">-</button>
+        </div>
         <div id="book-info">
           <div class="book-title" id="book-title">-</div>
           <div class="book-author" id="book-author">-</div>
         </div>
 
         <div class="progress-section">
-          <label for="current-page">current page:</label>
+          <label id="page-label" for="current-page">current page:</label>
+          <span id="add-text" class="hidden">add to library</span>
+          <button id="add-book-btn" class="icon-btn hidden" title="add to library">+</button>
           <input type="number" id="current-page" min="1" />
           <span id="total-pages-display">/ -</span>
         </div>
