@@ -165,8 +165,8 @@ async function openFloatingWindow() {
     const window = await chrome.windows.create({
       url: 'floating.html',
       type: 'popup',
-      width: 350,
-      height: 600,
+      width: 220,
+      height: 300,
       top: 100,
       left: 100,
     });

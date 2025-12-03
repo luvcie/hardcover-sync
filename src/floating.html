@@ -3,62 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>hardcover sync floating</title>
+  <title>hardcover sync</title>
   <link rel="stylesheet" href="styles/common.css">
   <link rel="stylesheet" href="styles/floating.css">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>hardcover sync</h1>
-      <button id="close-btn" class="close-btn" title="close floating window">×</button>
-      <div id="pdf-indicator" class="pdf-indicator hidden">
-        <span class="pdf-badge">PDF</span>
-        <span class="pdf-text">pdf detected</span>
-      </div>
+  <div class="container nano-mode">
+    <!-- Minimal Header -->
+    <header class="nano-header">
+      <div class="drag-handle"></div>
+      <button id="remove-book-btn" class="icon-btn hidden" title="remove from library" style="width: 20px; height: 20px; padding: 0; background: transparent; color: inherit; border: none; font-size: 18px;">-</button>
+      <button id="close-btn" class="icon-btn close-btn" title="close">×</button>
     </header>
 
     <main>
-      <div id="current-book-section" class="section hidden">
-        <div class="section-header">
-          <h2>current book</h2>
-          <button id="remove-book-btn" class="icon-btn danger-btn hidden" title="remove from library">-</button>
-        </div>
+      <div id="current-book-section" class="nano-content">
+        <!-- Title & Author -->
         <div id="book-info">
-          <div class="book-title" id="book-title">-</div>
-          <div class="book-author" id="book-author">-</div>
+          <div class="book-title" id="book-title">no book selected</div>
+          <div class="book-author" id="book-author"></div>
         </div>
 
-        <div class="progress-section">
-          <label id="page-label" for="current-page">current page:</label>
-          <span id="add-text" class="hidden">add to library</span>
-          <button id="add-book-btn" class="icon-btn hidden" title="add to library">+</button>
-          <input type="number" id="current-page" min="1" />
-          <span id="total-pages-display">/ -</span>
+        <!-- Progress Bar -->
+        <div class="progress-bar-container">
+           <div id="progress-fill" class="progress-bar-fill" style="width: 0%;"></div>
         </div>
+        
+        <!-- Controls -->
+        <div class="nano-controls">
+           <div class="page-input-group">
+             <input type="number" id="current-page" min="1" placeholder="0" />
+             <span id="total-pages-display" class="total-text">/ -</span>
+           </div>
 
-        <button id="update-btn" class="primary-btn">update progress</button>
-        <button id="change-book-btn" class="secondary-btn">change book</button>
-      </div>
-
-      <div id="select-book-section" class="section">
-        <h2>select book</h2>
-        <p class="help-text">search for your book on hardcover</p>
-
-        <input type="text" id="book-search" placeholder="enter book title or author..." />
-        <button id="search-btn" class="primary-btn">search</button>
-
-        <div id="search-results" class="search-results hidden">
-          <!-- search results will be populated here -->
+           <div class="control-strip">
+             <button id="prev-page-btn" class="control-btn" title="previous page">❮</button>
+             
+             <button id="update-btn" class="control-btn primary" title="update progress">●</button>
+             <button id="add-book-btn" class="control-btn primary hidden" title="add to library">+</button>
+             
+             <button id="next-page-btn" class="control-btn" title="next page">❯</button>
+           </div>
         </div>
+        
+        <!-- Label for "Add to Library" context -->
+        <div id="add-text" class="help-text hidden" style="text-align: center; margin-top: 8px;">add to library</div>
       </div>
 
       <div id="status-message" class="status-message hidden"></div>
     </main>
-
-    <footer>
-      <div class="help-text">click extension icon to toggle this window</div>
-    </footer>
   </div>
 
   <script src="floating.js"></script>
