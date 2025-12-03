@@ -6,7 +6,47 @@
   let testTokenBtn: HTMLElement;
   let statusMessage: HTMLElement;
   let enableKeybindsCheckbox: HTMLInputElement;
-  let themeRadios: NodeListOf<HTMLInputElement>;
+  
+  // Theme elements
+  let themeModeRadios: NodeListOf<HTMLInputElement>;
+  let themeCategorySelect: HTMLSelectElement;
+  let customThemeSelect: HTMLSelectElement;
+
+  const themeCategories = {
+    'dark-vibrant': [
+      { value: 'dracula', label: 'dracula' },
+      { value: 'gruvbox', label: 'gruvbox dark' },
+      { value: 'solarized-dark', label: 'solarized dark' },
+      { value: 'tokyo-night', label: 'tokyo night' },
+      { value: 'monokai', label: 'monokai' },
+      { value: 'one-dark', label: 'one dark' },
+      { value: 'synthwave', label: "synthwave '84" },
+      { value: 'terminal', label: 'terminal' }
+    ],
+    'dark-soft': [
+      { value: 'catppuccin', label: 'catppuccin mocha' },
+      { value: 'catppuccin-macchiato', label: 'catppuccin macchiato' },
+      { value: 'catppuccin-frappe', label: 'catppuccin frappe' },
+      { value: 'rose-pine', label: 'rosé pine' },
+      { value: 'rose-pine-moon', label: 'rosé pine moon' },
+      { value: 'nord', label: 'nord' },
+      { value: 'kanagawa', label: 'kanagawa' },
+      { value: 'everforest', label: 'everforest' }
+    ],
+    'light': [
+      { value: 'catppuccin-latte', label: 'catppuccin latte' },
+      { value: 'gruvbox-light', label: 'gruvbox light' },
+      { value: 'rose-pine-dawn', label: 'rosé pine dawn' },
+      { value: 'solarized-light', label: 'solarized light' }
+    ],
+    'retro-classic': [
+      { value: 'classic-cherry', label: 'classic cherry' },
+      { value: 'classic-gleep', label: 'classic gleep' },
+      { value: 'classic-indigo', label: 'classic indigo' },
+      { value: 'classic-platinum', label: 'classic platinum' },
+      { value: 'classic-yorha', label: 'classic yorha' }
+    ]
+  };
 
   document.addEventListener('DOMContentLoaded', () => {
     console.log('[hardcover settings] initializing settings page');
@@ -16,15 +56,20 @@
     testTokenBtn = document.getElementById('test-token-btn')!;
     statusMessage = document.getElementById('status-message')!;
     enableKeybindsCheckbox = document.getElementById('enable-keybinds') as HTMLInputElement;
-    themeRadios = document.querySelectorAll('input[name="theme"]');
+    
+    themeModeRadios = document.querySelectorAll('input[name="theme-mode"]');
+    themeCategorySelect = document.getElementById('theme-category') as HTMLSelectElement;
+    customThemeSelect = document.getElementById('custom-theme-select') as HTMLSelectElement;
 
     saveTokenBtn.addEventListener('click', handleSaveToken);
     testTokenBtn.addEventListener('click', handleTestToken);
     enableKeybindsCheckbox.addEventListener('change', handleKeybindsToggle);
 
-    themeRadios.forEach(radio => {
-      radio.addEventListener('change', handleThemeChange);
+    themeModeRadios.forEach(radio => {
+      radio.addEventListener('change', handleThemeModeChange);
     });
+    themeCategorySelect.addEventListener('change', handleCategoryChange);
+    customThemeSelect.addEventListener('change', handleCustomThemeChange);
 
     loadToken();
     loadKeybindsPreference();
@@ -164,6 +209,29 @@
     });
   }
 
+  function populateThemeSelect(category: string) {
+    customThemeSelect.innerHTML = '';
+    
+    let options = [];
+    if (category === 'all') {
+      options = [
+        ...themeCategories['dark-vibrant'],
+        ...themeCategories['dark-soft'],
+        ...themeCategories['light'],
+        ...themeCategories['retro-classic']
+      ];
+    } else {
+      options = themeCategories[category as keyof typeof themeCategories] || [];
+    }
+
+    options.forEach(opt => {
+      const option = document.createElement('option');
+      option.value = opt.value;
+      option.textContent = opt.label;
+      customThemeSelect.appendChild(option);
+    });
+  }
+
   function loadThemePreference() {
     console.log('[hardcover settings] loading theme preference');
 
@@ -175,26 +243,93 @@
 
       // default to auto if not set
       const theme = result.theme || 'auto';
-      const radioToCheck = document.getElementById(`theme-${theme}`) as HTMLInputElement;
-      if (radioToCheck) {
-        radioToCheck.checked = true;
+      
+      // Check if it's one of the standard themes
+      const isStandard = ['auto', 'light', 'dark'].includes(theme);
+
+      if (isStandard) {
+        const radio = document.getElementById(`theme-mode-${theme}`) as HTMLInputElement;
+        if (radio) radio.checked = true;
+        themeCategorySelect.disabled = true;
+        customThemeSelect.disabled = true;
+        // Populate default
+        populateThemeSelect('all'); 
+      } else {
+        const customRadio = document.getElementById('theme-mode-custom') as HTMLInputElement;
+        if (customRadio) customRadio.checked = true;
+        themeCategorySelect.disabled = false;
+        customThemeSelect.disabled = false;
+
+        // Find category
+        let foundCategory = 'all';
+        for (const [cat, themes] of Object.entries(themeCategories)) {
+          if (themes.some(t => t.value === theme)) {
+            foundCategory = cat;
+            break;
+          }
+        }
+        
+        themeCategorySelect.value = foundCategory;
+        populateThemeSelect(foundCategory);
+        customThemeSelect.value = theme;
       }
+
       console.log('[hardcover settings] theme preference loaded:', theme);
     });
   }
 
-  function handleThemeChange() {
-    const selectedTheme = Array.from(themeRadios).find(radio => radio.checked)?.value || 'auto';
-    console.log('[hardcover settings] theme changed to:', selectedTheme);
+  function handleThemeModeChange(e: Event) {
+    const target = e.target as HTMLInputElement;
+    const mode = target.value;
+    
+    console.log('[hardcover settings] theme mode changed to:', mode);
 
-    chrome.storage.local.set({ theme: selectedTheme }, () => {
+    if (mode === 'custom') {
+      themeCategorySelect.disabled = false;
+      customThemeSelect.disabled = false;
+      // If first time switching to custom, load default list and select first
+      if (customThemeSelect.options.length === 0) {
+        populateThemeSelect('all');
+      }
+      saveTheme(customThemeSelect.value);
+    } else {
+      themeCategorySelect.disabled = true;
+      customThemeSelect.disabled = true;
+      saveTheme(mode);
+    }
+  }
+
+  function handleCategoryChange() {
+    const category = themeCategorySelect.value;
+    populateThemeSelect(category);
+    // Auto-select first theme in new category
+    if (customThemeSelect.options.length > 0) {
+        customThemeSelect.selectedIndex = 0;
+        handleCustomThemeChange();
+    }
+  }
+
+  function handleCustomThemeChange() {
+    const selectedTheme = customThemeSelect.value;
+    console.log('[hardcover settings] custom theme changed to:', selectedTheme);
+    
+    const customRadio = document.getElementById('theme-mode-custom') as HTMLInputElement;
+    if (customRadio && !customRadio.checked) {
+      customRadio.checked = true;
+    }
+
+    saveTheme(selectedTheme);
+  }
+
+  function saveTheme(theme: string) {
+    chrome.storage.local.set({ theme: theme }, () => {
       if (chrome.runtime.lastError) {
         console.error('[hardcover settings] failed to save theme:', chrome.runtime.lastError);
         showStatus('failed to save theme preference', 'error');
         return;
       }
 
-      console.log('[hardcover settings] theme preference saved');
+      console.log('[hardcover settings] theme preference saved:', theme);
       applyTheme();
       showStatus('theme updated', 'success');
     });
@@ -206,7 +341,6 @@
       console.log('[hardcover settings] applying theme:', theme);
 
       if (theme === 'auto') {
-        // check system preference
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
       } else {
@@ -215,7 +349,6 @@
     });
   }
 
-  // listen for storage changes to update theme in real-time
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === 'local' && changes.theme) {
       console.log('[hardcover settings] theme changed in storage, reapplying');
@@ -223,7 +356,6 @@
     }
   });
 
-  // listen for system theme changes when in auto mode
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     chrome.storage.local.get(['theme'], (result) => {
       if (result.theme === 'auto' || !result.theme) {

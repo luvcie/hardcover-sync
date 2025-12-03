@@ -60,23 +60,45 @@
         <h2>appearance</h2>
 
         <div class="form-group">
-          <label for="theme-select">theme:</label>
-          <div class="theme-selector">
+          <label>theme mode:</label>
+          <div class="theme-mode-selector">
             <label class="radio-label">
-              <input type="radio" name="theme" id="theme-light" value="light">
+              <input type="radio" name="theme-mode" id="theme-mode-auto" value="auto" checked>
+              <span>auto (system)</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="theme-mode" id="theme-mode-light" value="light">
               <span>light</span>
             </label>
             <label class="radio-label">
-              <input type="radio" name="theme" id="theme-dark" value="dark">
+              <input type="radio" name="theme-mode" id="theme-mode-dark" value="dark">
               <span>dark</span>
             </label>
             <label class="radio-label">
-              <input type="radio" name="theme" id="theme-auto" value="auto" checked>
-              <span>auto</span>
+              <input type="radio" name="theme-mode" id="theme-mode-custom" value="custom">
+              <span>custom</span>
             </label>
           </div>
+        </div>
+
+        <div class="form-group">
+          <label for="theme-category">category:</label>
+          <select id="theme-category" class="select-input" disabled>
+            <option value="all">all themes</option>
+            <option value="dark-vibrant">dark & vibrant</option>
+            <option value="dark-soft">dark & soft</option>
+            <option value="light">light themes</option>
+            <option value="retro-classic">retro / classic</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="custom-theme-select">theme:</label>
+          <select id="custom-theme-select" class="select-input" disabled>
+            <!-- options populated by js -->
+          </select>
           <small class="help-text">
-            auto mode follows your system theme preference
+            select a custom theme
           </small>
         </div>
       </section>
